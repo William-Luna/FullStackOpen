@@ -11,6 +11,6 @@ Browser->>Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.js
 Server-->>Browser: main.js
 Note right of Browser: Browser executes js-code that requests JSON data from server
 Browser->>Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/data.json
-Server-->>Browser: [{ content: "HTML is easy", date: "2019-05-23" }, ...]
+Server-->>Browser: [{ content: "SAN LORENZO EL MAS GRANDE", date: "2022-12-08" }, ...]
 note right of Browser: Browser executes the event handler that renders notes to display
 ```
