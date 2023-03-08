@@ -10,30 +10,6 @@ app.use(cors())
 app.use(express.json())
 app.use(express.static('build'))
 
-// let persons = [
-//     {
-//         "id": 1,
-//         "name": "Arto Hellas",
-//         "number": "040-123456"
-//     },
-//     {
-//         "id": 2,
-//         "name": "Ada Lovelace",
-//         "number": "39-44-5323523"
-//     },
-//     {
-//         "id": 3,
-//         "name": "Dan Abramov",
-//         "number": "12-43-234345"
-//     },
-//     {
-//         "id": 4,
-//         "name": "Mary Poppendieck",
-//         "number": "39-23-6423122"
-//     }
-// ]
-
-
 morgan.token('body', (request, response) => {
     return request.body
 })
@@ -59,31 +35,23 @@ app.get('/api/persons', (request, response) => {
     })
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    Person.findById(id).then((err, res) => {
-        if (err) {
-            return response.status(400).json({
-                error: 'no matching id to person'
-            })
-        }
-        response.json(res)
-    })
+app.get('/api/persons/:id', (request, response, next) => {
+    Person.findById(request.params.id).then(res => {
+        if (res) response.json(res)
+        else response.status(404).end()
+    }).catch(error => next(error))
 })
 
-app.get('/info', (request, response) => {
-    Person.countDocuments({}, (err, res) => {
-        if (err) {
-            console.log(err)
-            response.status(400).json({
-                error: 'error finding count of phonebook entries'
-            })
-        }
+
+app.get('/info', (request, response, next) => {
+    Person.countDocuments({}).then(res => {
+        console.log(res)
         response.send(`<div>Phonebook has info for ${res} people</div><div>${Date()}</div>`)
-    })
+
+    }).catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
     console.log(body.name);
 
@@ -94,17 +62,6 @@ app.post('/api/persons', (request, response) => {
         })
     }
 
-    //duplicate check
-    // Person.findOne({name: body.name}).then((err, result) => {
-    //     if (err) console.log('Name is not in database. Proceeding to add...')
-    //     else {
-    //         console.log(`${body.name} is duplicate`)
-    //         return response.status(400).json({
-    //             error: 'name must be unique'
-    //         })
-    //     }
-    // })
-
     const person = new Person({
         name: body.name,
         number: body.number
@@ -112,15 +69,42 @@ app.post('/api/persons', (request, response) => {
 
     person.save().then(result => {
         console.log(`Added ${person.name} number ${person.number} to phonebook`)
+        response.json(result)
+    }).catch(error => next(error))
+})
+
+app.delete('/api/persons/:id', (request, response, next) => {
+    Person.findByIdAndRemove(request.params.id).then(result => {
+        response.status(204).end()
+    }).catch(error => {
+        next(error)
     })
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(p => p.id !== id)
-    console.log(`Deleted id ${id}`)
-    response.status(204).end()
+app.put('/api/persons/:id', (request, response, next) => {
+    const person = {
+        name: request.body.name,
+        number: request.body.number
+    }
+    Person.findByIdAndUpdate(request.params.id, person, { new: true }).then(updatedPerson => {
+        console.log(`Updated ${updatedPerson.name} number to ${updatedPerson.number}`)
+        response.json(updatedPerson)
+    }).catch(error => {
+        next(error)
+    })
 })
+
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'malformatted id' })
+    }
+    //other errors past for Express to handle
+    next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
