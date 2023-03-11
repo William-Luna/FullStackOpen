@@ -37,7 +37,7 @@ const App = () => {
         //alert(`${newName} is already added to phonebook.`);
         if (window.confirm(`${newName} already exists in the phonebook. Would you like to replace the old phone number with this new one?`)) {
           const editPersonObj = { name: newName, number: newNum };
-          personService.update(p.id, editPersonObj)
+          personService.update(p.id, editPersonObj, { runValidators: true })
             .then(updatedPerson => {
               console.log('Promise resolved. Updated person')
               setPersons(persons.map(person => person.id !== updatedPerson.id ? person : updatedPerson));
@@ -51,7 +51,7 @@ const App = () => {
             }).catch(error => {
               setPersons(persons.filter(p => p.name !== editPersonObj.name));
               setMessageStatus(false);
-              setMessage(`This number has already been deleted from the server. (${error})`);
+              setMessage(`Error updating number: (${error.response.data.error})`);
               setTimeout(() => {
                 setMessage(null);
               }, 5000);
@@ -75,7 +75,8 @@ const App = () => {
         }, 5000);
       }).catch(error => {
         setMessageStatus(false);
-        setMessage(`Error adding number. (${error})`);
+        console.log(error.response)
+        setMessage(`Error adding number: (${error.response.data.error})`);
         setTimeout(() => {
           setMessage(null);
         }, 5000)
