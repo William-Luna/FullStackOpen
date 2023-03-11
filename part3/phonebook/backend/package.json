@@ -7,10 +7,12 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:ui": "rm -rf build && cd '../phonebook-frontend/' && npm run build && cp -r build ../phonebook-backend",
+    "build:ui": "rmdir /s build && cd ../frontend && npm run build && xcopy /e /i build ..\\backend\\build && cd ../backend",
     "deploy": "fly deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
-    "logs:prod": "fly logs"
+    "logs:prod": "fly logs",
+    "lint": "eslint .",
+    "lint:auto": "eslint . --fix"
   },
   "author": "William Luna",
   "license": "ISC",
@@ -22,6 +24,7 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "eslint": "^8.36.0",
     "nodemon": "^2.0.20"
   }
 }
