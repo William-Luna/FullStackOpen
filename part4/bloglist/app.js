@@ -4,7 +4,7 @@ const cors = require('cors')
 const blogsRouter = require('./controllers/blogs')
 const mongoose = require('mongoose')
 
-const mongoUrl = 'mongodb+srv://main:s8leuC6jDGDTbZbY@cluster0.3kpgvsf.mongodb.net/BlogList?retryWrites=true&w=majority'
+const mongoUrl = process.env.MONGODB_URI
 mongoose.connect(mongoUrl)
 
 app.use(cors())
