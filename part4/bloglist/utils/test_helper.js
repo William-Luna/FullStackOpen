@@ -21,6 +21,10 @@ const usersInDb = async () => {
   return users.map(user => user.toJSON())
 }
 
+const createToken = async (username) => {
+
+}
+
 module.exports = {
   initialBlogs, blogsInDb, initialUsers, usersInDb
 }

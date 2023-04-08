@@ -1,6 +1,7 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
@@ -10,7 +11,7 @@ blogsRouter.get('/', async (request, response) => {
 blogsRouter.post('/', async (request, response) => {
   if (!request.body.title || !request.body.url) return response.status(400).json({ error: 'Missing title or author' })
 
-  const user = await User.findById(request.body.userId)
+  const user = request.user //from userExtractor middleware
 
   const blog = new Blog({
     title: request.body.title,
@@ -29,7 +30,20 @@ blogsRouter.post('/', async (request, response) => {
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
+  const user = request.user //from userExtractor middleware
+  const blog = await Blog.findById(request.params.id)
+
+  if (blog.user.toString() !== user._id.toString())
+    return response.status(401).json({ error: 'User does not match user that created the blog.' })
+
   await Blog.findByIdAndRemove(request.params.id)
+  console.log(`Blog ${request.params.id} has been removed...`)
+
+  const index = user.blogs.indexOf(user._id)
+  user.blogs.splice(index, 1)
+  await user.save()
+  console.log('...and blog removed under user')
+
   response.status(204).end()
 })
 

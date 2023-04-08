@@ -18,6 +18,8 @@ beforeEach(async () => {
   let userObjects = helper.initialUsers.map(user => new User(user))
   const promisesAddingUsers = userObjects.map(note => note.save())
   await Promise.all(promisesAddingUsers)
+
+
 })
 
 describe('testing blog CRUD', () => {
@@ -46,7 +48,9 @@ describe('testing blog CRUD', () => {
     const newBlog = {
       title: "newest blog", author: "Test Tests", url: "github.com", likes: 123
     }
-    await api.post('/api/blogs').send(newBlog).expect(201).expect('Content-Type', /application\/json/)
+
+    const token = getToken
+    await (await api.post('/api/blogs')).set('Authorization', `Bearer ${token}`).send(newBlog).expect(201).expect('Content-Type', /application\/json/)
 
     const allBlogs = await helper.blogsInDb()
     expect(allBlogs).toHaveLength(helper.initialBlogs.length + 1)
