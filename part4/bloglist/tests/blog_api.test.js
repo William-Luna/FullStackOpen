@@ -11,14 +11,15 @@ beforeEach(async () => {
   await Blog.deleteMany({})
   await User.deleteMany({})
 
-  let blogObjects = helper.initialBlogs.map(blog => new Blog(blog))
-  const promisesAddingBlogs = blogObjects.map(note => note.save())
-  await Promise.all(promisesAddingBlogs)
-
   let userObjects = helper.initialUsers.map(user => new User(user))
-  const promisesAddingUsers = userObjects.map(note => note.save())
+  const promisesAddingUsers = userObjects.map(user => user.save())
   await Promise.all(promisesAddingUsers)
 
+  const testUser = await User.findOne({ username: 'firstuser' })
+
+  let blogObjects = helper.initialBlogs.map(blog => new Blog({ ...blog, user: testUser.id }))
+  const promisesAddingBlogs = blogObjects.map(blog => blog.save())
+  await Promise.all(promisesAddingBlogs)
 
 })
 
@@ -49,8 +50,8 @@ describe('testing blog CRUD', () => {
       title: "newest blog", author: "Test Tests", url: "github.com", likes: 123
     }
 
-    const token = getToken
-    await (await api.post('/api/blogs')).set('Authorization', `Bearer ${token}`).send(newBlog).expect(201).expect('Content-Type', /application\/json/)
+    const token = await helper.createToken('firstuser')
+    await api.post('/api/blogs').set('Authorization', `Bearer ${token}`).send(newBlog).expect(201).expect('Content-Type', /application\/json/)
 
     const allBlogs = await helper.blogsInDb()
     expect(allBlogs).toHaveLength(helper.initialBlogs.length + 1)
@@ -64,7 +65,8 @@ describe('testing blog CRUD', () => {
       title: "newest blog without likes", author: "Test Tests", url: "ebay.com"
     }
 
-    await api.post('/api/blogs').send(newBlog).expect(201).expect('Content-Type', /application\/json/)
+    const token = await helper.createToken('firstuser')
+    await api.post('/api/blogs').set('Authorization', `Bearer ${token}`).send(newBlog).expect(201).expect('Content-Type', /application\/json/)
 
     const allBlogs = await helper.blogsInDb()
     const lastBlog = allBlogs[allBlogs.length - 1]
@@ -76,20 +78,22 @@ describe('testing blog CRUD', () => {
       author: "Test Tests", url: "twitter.com", likes: 23
     }
 
-    await api.post('/api/blogs').send(blogWithoutTitle).expect(400)
+    const token = await helper.createToken('firstuser')
+    await api.post('/api/blogs').set('Authorization', `Bearer ${token}`).send(blogWithoutTitle).expect(400)
 
     const blogWithoutUrl = {
       title: "newest blog without url", author: "Test Tests", likes: 24
     }
 
-    await api.post('/api/blogs').send(blogWithoutUrl).expect(400)
+    await api.post('/api/blogs').set('Authorization', `Bearer ${token}`).send(blogWithoutUrl).expect(400)
   })
 
   test('a blog can be deleted', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogsToDelete = blogsAtStart[0]
 
-    await api.delete(`/api/blogs/${blogsToDelete.id}`).expect(204)
+    const token = await helper.createToken('firstuser')
+    await api.delete(`/api/blogs/${blogsToDelete.id}`).set('Authorization', `Bearer ${token}`).expect(204)
 
     const blogsAfterDeletion = await helper.blogsInDb()
     expect(blogsAfterDeletion).toHaveLength(blogsAtStart.length - 1)
