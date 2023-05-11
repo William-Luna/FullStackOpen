@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
+import BlogForm from './components/BlogForm'
+import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -29,6 +31,8 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+
+  const blogFormRef = useRef()
 
   const handleLogin = async event => {
     event.preventDefault()
@@ -80,6 +84,7 @@ const App = () => {
     try {
       const returnedBlog = await blogService.create(blogObj)
 
+      blogFormRef.current.toggleVisibility()
       setBlogs(blogs.concat(returnedBlog))
 
       setMsgStatus(true)
@@ -140,22 +145,12 @@ const App = () => {
         {user.name} logged in.
         <button onClick={handleLogout}>Logout</button>
       </div>
-      <div>
-        <h3>Create New Blog</h3>
-        <form onSubmit={createBlog}>
-          <div>
-            Title:
-            <input type="text" value={title} name="title" onChange={({ target }) => setTitle(target.value)} />
-          </div><div>
-            Author:
-            <input type="text" value={author} name="author" onChange={({ target }) => setAuthor(target.value)} />
-          </div><div>
-            URL:
-            <input type="text" value={url} name="url" onChange={({ target }) => setUrl(target.value)} />
-          </div>
-          <button type="submit">Create</button>
-        </form>
-      </div>
+      <Togglable buttonLabel='Create New Blog' ref={blogFormRef}>
+        <BlogForm handleSubmit={createBlog} title={title} author={author} url={url}
+          handleTitleChange={({ target }) => setTitle(target.value)}
+          handleAuthorChange={({ target }) => setAuthor(target.value)}
+          handleUrlChange={({ target }) => setUrl(target.value)} />
+      </Togglable>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
       )}
