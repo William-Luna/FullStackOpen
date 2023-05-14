@@ -23,11 +23,13 @@ blogsRouter.post('/', userExtractor, async (request, response) => {
   })
 
   const savedBlog = await blog.save()
+  //populate new blog's user with name field so that it is displayed upon post request without rerendering
+  const savedBlogWithName = await Blog.findById(savedBlog._id).populate('user', { name: 1 })
   console.log("Blog saved...")
   user.blogs = user.blogs.concat(savedBlog._id)
   await user.save()
   console.log("...and blog saved under user")
-  response.status(201).json(savedBlog)
+  response.status(201).json(savedBlogWithName)
 })
 
 blogsRouter.delete('/:id', userExtractor, async (request, response) => {
