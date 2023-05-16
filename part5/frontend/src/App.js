@@ -15,9 +15,10 @@ const App = () => {
   const [msgStatus, setMsgStatus] = useState(true)
 
   useEffect(() => {
-    blogService.getAll().then(allBlogs =>
+    blogService.getAll().then(allBlogs => {
+      allBlogs.sort((a, b) => b.likes - a.likes)
       setBlogs(allBlogs)
-    )
+    })
   }, [])
 
   useEffect(() => {
@@ -92,9 +93,21 @@ const App = () => {
         setNotiMsg(null)
       }, 5000)
     }
+  }
 
 
+  const addLike = async blogObj => {
+    try {
+      const returnedBlog = await blogService.editLike(blogObj)
+      setBlogs(blogs.map(blog => blog.id !== returnedBlog.id ? blog : returnedBlog))
 
+    } catch (err) {
+      setMsgStatus(false)
+      setNotiMsg(`Error: ${err}`)
+      setTimeout(() => {
+        setNotiMsg(null)
+      }, 5000)
+    }
   }
 
   if (user === null) {
@@ -139,7 +152,7 @@ const App = () => {
         <BlogForm createBlog={createBlog} />
       </Togglable>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} addLike={addLike} />
       )}
     </div>
   )
