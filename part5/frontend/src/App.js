@@ -110,6 +110,28 @@ const App = () => {
     }
   }
 
+  const deleteBlog = async blogObj => {
+    if (window.confirm(`Are you sure you want to delete ${blogObj.title} by ${blogObj.author}?`)) {
+      try {
+        await blogService.del(blogObj)
+        setBlogs(blogs.filter(blog => blog.id !== blogObj.id))
+        setMsgStatus(true)
+        setNotiMsg(`Blog "${blogObj.title}" has been deleted`)
+        setTimeout(() => {
+          setNotiMsg(null)
+        }, 5000)
+
+
+      } catch (err) {
+        setMsgStatus(false)
+        setNotiMsg(`Error: ${err}`)
+        setTimeout(() => {
+          setNotiMsg(null)
+        }, 5000)
+      }
+    }
+  }
+
   if (user === null) {
     return (
       <div>
@@ -152,7 +174,7 @@ const App = () => {
         <BlogForm createBlog={createBlog} />
       </Togglable>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} addLike={addLike} />
+        <Blog key={blog.id} blog={blog} addLikeService={addLike} deleteBlogService={deleteBlog} user={user} />
       )}
     </div>
   )

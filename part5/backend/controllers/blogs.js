@@ -24,7 +24,8 @@ blogsRouter.post('/', userExtractor, async (request, response) => {
 
   const savedBlog = await blog.save()
   //populate new blog's user with name field so that it is displayed upon post request without rerendering
-  const savedBlogWithName = await Blog.findById(savedBlog._id).populate('user', { name: 1 })
+  //username passed in for remove button condition
+  const savedBlogWithName = await Blog.findById(savedBlog._id).populate('user', { name: 1, username: 1 })
   console.log("Blog saved...")
   user.blogs = user.blogs.concat(savedBlog._id)
   await user.save()
@@ -39,14 +40,13 @@ blogsRouter.delete('/:id', userExtractor, async (request, response) => {
   if (blog.user.toString() !== user._id.toString())
     return response.status(401).json({ error: 'User does not match user that created the blog.' })
 
-  await Blog.findByIdAndRemove(request.params.id)
-  console.log(`Blog ${request.params.id} has been removed...`)
+  const deletedBlog = await Blog.findByIdAndRemove(request.params.id)
+  console.log(`Blog ${deletedBlog.id} has been removed...`)
 
   const index = user.blogs.indexOf(user._id)
   user.blogs.splice(index, 1)
   await user.save()
   console.log('...and blog removed under user')
-
   response.status(204).end()
 })
 
@@ -60,7 +60,7 @@ blogsRouter.put('/:id', async (request, response) => {
 
   const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
   //populate new blog's user with name field so that it is displayed upon post request without rerendering
-  const updatedBlogNewLikes = await Blog.findById(updatedBlog._id).populate('user', { name: 1 })
+  const updatedBlogNewLikes = await Blog.findById(updatedBlog._id).populate('user', { name: 1, username: 1 })
   response.status(200).json(updatedBlogNewLikes)
 })
 

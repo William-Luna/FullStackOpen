@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-const Blog = ({ blog, addLike }) => {
+const Blog = ({ blog, addLikeService, deleteBlogService, user }) => {
   const [blogView, toggleBlogView] = useState(false)
 
   const viewLabel = blogView ? 'hide' : 'view'
@@ -16,7 +16,12 @@ const Blog = ({ blog, addLike }) => {
     event.preventDefault()
     const newLikes = blog.likes + 1
     const blogWithAddedLike = { ...blog, likes: newLikes }
-    addLike(blogWithAddedLike)
+    addLikeService(blogWithAddedLike)
+  }
+
+  const deleteBlog = event => {
+    event.preventDefault()
+    deleteBlogService(blog)
   }
 
   return (
@@ -31,6 +36,8 @@ const Blog = ({ blog, addLike }) => {
         <button onClick={incrementLike}>Like</button>
         <br></br>
         Submitted by {blog.user.name}
+        <br></br>
+        <button style={{ display: user.username === blog.user.username ? '' : 'none' }} onClick={deleteBlog}>Remove</button>
       </div>
     </div>
   )
