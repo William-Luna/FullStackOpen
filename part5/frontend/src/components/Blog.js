@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState } from 'react'
 
 const Blog = ({ blog, addLikeService, deleteBlogService, user }) => {
   const [blogView, toggleBlogView] = useState(false)
@@ -26,7 +26,7 @@ const Blog = ({ blog, addLikeService, deleteBlogService, user }) => {
 
   return (
     <div style={blogStyle}>
-      <span>"{blog.title}" by {blog.author} </span>
+      <span>{blog.title} by {blog.author} </span>
       <button onClick={() => toggleBlogView(!blogView)}>{viewLabel}</button>
       <br></br>
       <div style={{ display: blogView ? '' : 'none' }}>
