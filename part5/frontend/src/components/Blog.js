@@ -27,13 +27,13 @@ const Blog = ({ blog, addLikeService, deleteBlogService, user }) => {
   return (
     <div style={blogStyle}>
       <span>{blog.title} by {blog.author} </span>
-      <button onClick={() => toggleBlogView(!blogView)}>{viewLabel}</button>
+      <button onClick={() => toggleBlogView(!blogView)} className='viewbutton'>{viewLabel}</button>
       <br></br>
-      <div style={{ display: blogView ? '' : 'none' }}>
+      <div style={{ display: blogView ? '' : 'none' }} className='blogexpanded'>
         <a href={blog.url}>{blog.url}</a>
         <br></br>
         {blog.likes}
-        <button onClick={incrementLike}>Like</button>
+        <button onClick={incrementLike} className='likebutton'>Like</button>
         <br></br>
         Submitted by {blog.user.name}
         <br></br>
