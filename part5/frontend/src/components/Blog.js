@@ -25,7 +25,7 @@ const Blog = ({ blog, addLikeService, deleteBlogService, user }) => {
   }
 
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} className="blog">
       <span>{blog.title} by {blog.author} </span>
       <button onClick={() => toggleBlogView(!blogView)} className='viewbutton'>{viewLabel}</button>
       <br></br>
