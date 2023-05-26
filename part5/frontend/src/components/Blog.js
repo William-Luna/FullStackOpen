@@ -32,12 +32,12 @@ const Blog = ({ blog, addLikeService, deleteBlogService, user }) => {
       <div style={{ display: blogView ? '' : 'none' }} className='blogexpanded'>
         <a href={blog.url}>{blog.url}</a>
         <br></br>
-        {blog.likes}
+        <span className="likes">{blog.likes}</span>
         <button onClick={incrementLike} className='likebutton'>Like</button>
         <br></br>
         Submitted by {blog.user.name}
         <br></br>
-        <button style={{ display: user.username === blog.user.username ? '' : 'none' }} onClick={deleteBlog}>Remove</button>
+        <button style={{ display: user.username === blog.user.username ? '' : 'none' }} onClick={deleteBlog} className="deletebutton">Remove</button>
       </div>
     </div>
   )

@@ -1,12 +1,19 @@
 describe('Blog app', function () {
   beforeEach(function () {
     cy.request('POST', 'http://localhost:3003/api/testing/reset')
-    const user = {
+    const user1 = {
       name: 'Test User',
       username: 'test',
       password: 'password'
     }
-    cy.request('POST', 'http://localhost:3003/api/users/', user)
+
+    const user2 = {
+      name: 'Guest User',
+      username: 'guestuser',
+      password: 'password'
+    }
+    cy.request('POST', 'http://localhost:3003/api/users/', user1)
+    cy.request('POST', 'http://localhost:3003/api/users/', user2)
     cy.visit('http://localhost:3000')
   })
 
@@ -35,6 +42,7 @@ describe('Blog app', function () {
   describe('When logged in', function () {
     beforeEach(function () {
       cy.login({ username: 'test', password: 'password' })
+      cy.createBlog({ title: 'Init Title', author: 'Init Author', url: 'Init Url' })
     })
 
     it('A blog can be created', function () {
@@ -46,10 +54,30 @@ describe('Blog app', function () {
 
       cy.get('#notification').should('have.css', 'color', 'rgb(0, 128, 0)')
         .and('contain', 'Blog "test title" has been added')
-      cy.get('.blog').should('contain', 'test title by test author')
+      cy.contains('test title by test author ').parent().find('.viewbutton').click()
+      cy.get('.blogexpanded:last').contains('Submitted by Test User')
+    })
 
+    it('A blog can be liked', function () {
       cy.get('.viewbutton').click()
-      cy.get('.blogexpanded').should('contain', 'Submitted by Test User')
+      cy.get('.likebutton').click()
+      cy.get('.likes').contains('1')
+      cy.get('.likebutton').click()
+      cy.get('.likes').contains('2')
+    })
+
+    it('A blog can be deleted', function () {
+      cy.get('.viewbutton').click().parent().get('.deletebutton').click()
+      cy.get('#notification').should('have.css', 'color', 'rgb(0, 128, 0)')
+        .and('contain', 'Blog "Init Title" has been deleted')
+      cy.get('.blog').should('not.exist')
+    })
+
+    it('A blog cannot be deleted by a different user from who created it', function () {
+      cy.get('.viewbutton').click().parent().get('.deletebutton').should('be.visible')
+      cy.get('.logoutbutton').click()
+      cy.login({ username: 'guestuser', password: 'password' })
+      cy.get('.viewbutton').click().parent().get('.deletebutton').should('not.be.visible')
     })
   })
 })
