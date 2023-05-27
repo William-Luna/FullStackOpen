@@ -1,6 +1,6 @@
 describe('Blog app', function () {
   beforeEach(function () {
-    cy.request('POST', 'http://localhost:3003/api/testing/reset')
+    cy.request('POST', `${Cypress.env('BACKEND')}/testing/reset`)
     const user1 = {
       name: 'Test User',
       username: 'test',
@@ -12,9 +12,9 @@ describe('Blog app', function () {
       username: 'guestuser',
       password: 'password'
     }
-    cy.request('POST', 'http://localhost:3003/api/users/', user1)
-    cy.request('POST', 'http://localhost:3003/api/users/', user2)
-    cy.visit('http://localhost:3000')
+    cy.request('POST', `${Cypress.env('BACKEND')}/users/`, user1)
+    cy.request('POST', `${Cypress.env('BACKEND')}/users/`, user2)
+    cy.visit('')
   })
 
   it('Login form is shown', function () {
@@ -78,6 +78,16 @@ describe('Blog app', function () {
       cy.get('.logoutbutton').click()
       cy.login({ username: 'guestuser', password: 'password' })
       cy.get('.viewbutton').click().parent().get('.deletebutton').should('not.be.visible')
+    })
+
+    it('blogs are ordered by likes', function () {
+
+      cy.createBlog({ title: 'most likes', author: 's', url: 's', likes: 3 })
+      cy.createBlog({ title: 'second most likes', author: 's', url: 's', likes: 2 })
+      cy.visit('')
+      cy.get('.blog').eq(0).should('contain', 'most likes')
+      cy.get('.blog').eq(1).should('contain', 'second most likes')
+      cy.get('.blog').eq(2).should('contain', 'Init Title')
     })
   })
 })
